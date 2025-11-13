@@ -94,19 +94,154 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
-<h4 class="name" id="baseURL"><span class="type-signature">(constant) </span>baseURL<span class="type-signature"></span></h4>
 
+    
+
+    
+    <h4 class="name" id="create"><span class="type-signature">(async) </span>create<span class="signature">(record)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>|string|Object|string|*|string}</span></h4>
+    
+
+    
 
 
 
 <div class="description">
-    SheetAPI.jsVanilla JS Google Sheets wrapper with REST-style responses.Features:- CRUD operations: create, read, update, delete- Partial updates supported- Auto sheet/header creation- Auto unique ID generation- Existence checks: sheetExists(), recordExists()- Generic field search: getByField(), getIdByField()- getAll supports filtering, sorting, field selection, pagination- Standardized {status, data, error} responses- Fully commented with usage examples- CDN-ready: can use via <script> tag (no modules)
+    Creates a new record in the Google Sheet with automatic ID generation, type casting, and validation.This method handles the complete process of adding a new record to the spreadsheet, including data validation,type coercion according to the schema, automatic unique ID generation, and cache invalidation. It ensuresdata integrity and provides comprehensive error handling for various failure scenarios.## Core Functionality### Record Creation Process1. **Input Validation**: Validates the input record object2. **ID Generation**: Auto-generates unique ID if not provided3. **Type Casting**: Converts values according to schema definitions4. **Data Serialization**: Formats data for Google Sheets API5. **API Submission**: Sends data to Google Sheets API6. **Cache Management**: Invalidates relevant caches7. **Response Handling**: Returns success/error with processed data### Automatic ID Generation- Uses `generateUniqueId()` method for consistent ID creation- Ensures uniqueness across all records- Follows configurable ID generation patterns- Prevents ID collisions in concurrent operations### Type Casting & Validation- Applies schema-defined type conversions- Handles null/undefined values gracefully- Converts dates to ISO strings for storage- Ensures data consistency across operations## Data Processing### Schema-Based Processing- Maps record fields to header positions- Applies type-specific formatting- Handles missing fields with empty strings- Preserves data integrity during conversion### Value Serialization```javascript// Date objects → ISO stringsnew Date() → "2023-01-15T10:30:00.000Z"// Numbers → strings42 → "42"// Booleans → stringstrue → "true"// Null/undefined → empty stringsnull → ""undefined → ""```## Authentication Handling### Direct Token Usage- Uses `accessToken` if available- Adds Bearer authorization header- Direct API communication### Token Manager Usage- Delegates to `SheetAPITokenManager.authFetch()`- Automatic token refresh if needed- Enhanced error handling and retry logic## Cache Management### Invalidation Strategy- Clears data cache (`_clearDataCache()`)- Forces fresh data loading on next read- Maintains cache consistency- Preserves query cache for unaffected queries### Performance Impact- Minimal overhead for cache clearing- Ensures data freshness for subsequent reads- Prevents stale data issues## Error Conditions### Validation Errors- **Invalid Input**: Non-object parameter- **Uninitialized API**: `init()` not called- **Missing Authentication**: No access token or token manager### API Errors- **Permission Denied**: Insufficient Google Sheets permissions- **Quota Exceeded**: API rate limits or usage limits- **Invalid Data**: Malformed data causing API rejection- **Network Issues**: Connectivity problems during submission### Processing Errors- **Type Casting Failures**: Incompatible data types- **Serialization Errors**: Complex objects that can't be stringified- **Schema Mismatches**: Fields not defined in headers## Parameter Specifications
 </div>
 
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>record</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data record to create in the spreadsheet- Must be a non-null object- Can contain any fields defined in the schema- ID field is optional (auto-generated if missing)- Values are type-cast according to schema definitions- Extra fields are preserved but may be ignored by API
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Unique identifier for the record (auto-generated if not provided)- Should be unique across all records- Used for subsequent get/update/delete operations- Generated using `generateUniqueId()` if missing</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>*</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Any other fields defined in the schema- Type depends on schema definition- Automatically cast to appropriate type- Converted to string for Google Sheets storage## Return Value Structure### Success Response```javascript{  status: "success",  data: {    id: "user-1234567890",    name: "John Doe",    email: "john@example.com",    age: 30,    active: true,    createdAt: new Date("2023-01-15T10:30:00.000Z")  }}```### Error Response```javascript{  status: "error",  error: "Failed to create record: Insufficient permissions"}```## Usage Examples### Basic Record Creation```javascriptconst result = await api.create({  name: "John Doe",  email: "john@example.com",  age: 30});if (result.status === "success") {  console.log("Created record with ID:", result.data.id);} else {  console.error("Failed to create record:", result.error);}```### Record with Custom ID```javascriptconst result = await api.create({  id: "custom-user-001",  name: "Jane Smith",  department: "Engineering",  salary: 75000});```### Record with Date Fields```javascriptconst result = await api.create({  name: "Project Alpha",  startDate: new Date("2023-01-15"),  endDate: new Date("2023-06-30"),  budget: 50000,  active: true});```### Error Handling```javascripttry {  const result = await api.create({    name: "Test User"    // Missing email field  });  if (result.status === "error") {    switch (true) {      case result.error.includes("permissions"):        console.log("Check Google Sheets sharing settings");        break;      case result.error.includes("authentication"):        console.log("Refresh access token or check credentials");        break;      default:        console.log("Creation failed:", result.error);    }  }} catch (unexpectedError) {  console.error("Unexpected error:", unexpectedError);}```## Performance Characteristics### Execution Time- **Typical**: 1-3 seconds (includes API round-trip)- **Network-bound**: Dominated by Google Sheets API latency- **Processing**: Minimal local processing overhead### Resource Usage- **Memory**: O(n) where n = number of fields- **Network**: Single API call with small payload- **Storage**: One additional row in Google Sheet## Security Considerations- **Input Validation**: Prevents injection through type casting- **Authentication**: Secure token handling and validation- **Data Sanitization**: Safe string conversion for all values- **Permission Checks**: Relies on Google Sheets access controls## Integration Notes- **Cache Consistency**: Automatically invalidates affected caches- **ID Uniqueness**: Guarantees unique IDs across operations- **Type Safety**: Maintains data types through casting- **Error Propagation**: Provides detailed error information</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -116,7 +251,13 @@
 <dl class="details">
 
     
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
 
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
     
 
     
@@ -142,7 +283,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line18">line 18</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2204">line 2204</a>
     </li></ul></dd>
     
 
@@ -158,9 +299,1521 @@
 
 
 
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
         
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Propagates unexpected errors during record creation or API communication
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
     
 
+
+<h5>Returns:</h5>
+<ul>
+        <li>
+<div class="param-desc">
+    Standardized response with creation status and record data
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.status - Operation status: "success" or "error"
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.data] - Created record with processed data and generated ID
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data.id - Unique identifier (generated or provided)
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data.* - All other fields with type-cast values
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.error] - Descriptive error message if creation failed
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    </ul>
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getAll"><span class="type-signature">(async) </span>getAll<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>|string|Array.&lt;Object>|string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves all records from the Google Sheet with advanced filtering, sorting, pagination, and caching capabilities.This method provides a comprehensive data retrieval interface that supports complex queries, performance optimization through caching,and flexible data manipulation. It implements intelligent caching strategies, type-aware filtering, and memory-efficient paginationto handle datasets of varying sizes efficiently.## Core Functionality### Data Retrieval- Fetches all records from the configured sheet- Applies type casting based on schema definitions- Handles missing or malformed data gracefully- Returns structured records with proper data types### Advanced Filtering- **Field-based filtering** with multiple operators- **Type-aware comparisons** for strings, numbers, dates, and booleans- **Complex conditions** with logical AND operations- **Pattern matching** with contains, starts with, ends with- **Range queries** for numeric and date fields### Sorting Capabilities- **Multi-field sorting** with ascending/descending order- **Type-aware sorting** respecting data types- **Stable sort** for consistent results- **Custom sort fields** from schema definition### Pagination & Limiting- **Page-based pagination** with configurable page sizes- **Offset-based pagination** for cursor-like behavior- **Memory protection** with automatic limits for large datasets- **Efficient slicing** without loading unnecessary data## Caching Strategy### Multi-Level Caching- **Data Cache**: Full sheet data caching for simple queries- **Query Cache**: Result caching for complex filtered/sorted queries- **LRU Eviction**: Automatic cleanup of least recently used cache entries- **TTL Management**: Time-based expiration with configurable durations### Cache Optimization- **Smart Cache Usage**: Only caches when beneficial (avoids cache overhead for small datasets)- **Cache Invalidation**: Automatic invalidation on data modifications- **Memory Management**: Size limits to prevent memory exhaustion- **Performance Tracking**: Hit/miss statistics for optimization## Filtering Operators### Comparison Operators- `"eq"`: Equal to (type-aware)- `"neq"`: Not equal to (type-aware)- `"lt"`: Less than (numeric/string/date)- `"le"`: Less than or equal- `"gt"`: Greater than- `"ge"`: Greater than or equal### Pattern Matching- `"cs"`: Contains substring (case-sensitive)- `"sw"`: Starts with- `"ew"`: Ends with- `"bt"`: Between range (comma-separated values)- `"in"`: In list (comma-separated values)- `"is"`: Is null/empty## Type-Aware Operations### String Fields- Lexicographic comparison for `<`, `<=`, `>`, `>=`- Substring matching for `cs`, `sw`, `ew`- Case-sensitive operations### Numeric Fields- Mathematical comparison with `parseFloat()`- Range operations with numeric bounds- Automatic type coercion for consistency### Date Fields- Date object comparison for temporal operations- ISO string parsing for range boundaries- Chronological sorting and filtering### Boolean Fields- Strict equality comparison- Truthy/falsy value handling## Performance Characteristics### Time Complexity- **O(1)**: Cached queries (immediate return)- **O(n)**: Full dataset filtering/sorting (linear in record count)- **O(n log n)**: Multi-field sorting operations- **O(1)**: Pagination slicing after processing### Memory Usage- **Minimal**: Cached results reuse existing data- **Controlled**: Automatic limits prevent memory exhaustion- **Efficient**: Lazy loading and streaming for large datasets### Network Optimization- **Single API Call**: Batch data retrieval- **Conditional Fetching**: Cache-first strategy- **Minimal Payload**: Only requested fields transferred## Options Parameter Structure
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last">Comprehensive query options for data retrieval and manipulation
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Field-based filtering conditions with operator support
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>field</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Field name to filter on (must exist in schema)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>condition</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Filter condition with operator and value
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>op</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Filter operator (eq, neq, lt, le, gt, ge, cs, sw, ew, bt, in, is)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Value to compare against (type depends on field schema)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sort</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Array.&lt;string, string>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Multi-field sorting specification
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>field</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Field name to sort by</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>direction</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'asc'
+                
+                </td>
+            
+
+            <td class="description last">Sort direction: 'asc' or 'desc'</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fields</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Field selection for partial record retrieval- Limits returned data to specified fields only- Reduces memory usage and network transfer- Maintains original record structure</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>limit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Maximum number of records to return- Overrides default memory protection limit- Takes precedence over pagination settings- Useful for sampling or preview operations</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>page</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Page number for page-based pagination (1-based)- Requires `perPage` to be specified- Calculates offset automatically: `(page - 1) * perPage`- Returns slice of data for specified page</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>perPage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Records per page for pagination- Required when using `page` parameter- Determines page size for chunked data retrieval- Balances memory usage with user experience</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Zero-based offset for cursor-based pagination- Alternative to page-based pagination- Specifies starting record index- Useful for infinite scroll implementations## Return Value Structure### Success Response```javascript{  status: "success",  data: [    {      id: "user-123",      name: "John Doe",      email: "john@example.com",      age: 30,      active: true,      createdAt: new Date("2023-01-15")    },    // ... more records  ]}```### Error Response```javascript{  status: "error",  data: [], // Empty array for consistency  error: "SheetAPI not initialized"}```## Usage Examples### Basic Data Retrieval```javascript// Get all records (with automatic 1000 record limit)const allRecords = await api.getAll();console.log(`Found ${allRecords.data.length} records`);```### Advanced Filtering```javascript// Filter by multiple conditionsconst activeAdults = await api.getAll({  filter: {    age: { op: "ge", value: 18 },    active: { op: "eq", value: true },    department: { op: "cs", value: "engineering" }  }});```### Sorting and Pagination```javascript// Sort by name, then by age descendingconst sortedUsers = await api.getAll({  sort: [    { field: "name", direction: "asc" },    { field: "age", direction: "desc" }  ],  page: 1,  perPage: 50});```### Field Selection```javascript// Only return specific fieldsconst userNames = await api.getAll({  fields: ["id", "name", "email"],  limit: 100});```### Complex Queries```javascript// Combine filtering, sorting, and paginationconst recentOrders = await api.getAll({  filter: {    status: { op: "in", value: "pending,processing" },    createdAt: { op: "ge", value: "2023-01-01" }  },  sort: [{ field: "createdAt", direction: "desc" }],  fields: ["id", "customer", "total", "status"],  page: 1,  perPage: 25});```### Range Queries```javascript// Numeric rangeconst midRangeProducts = await api.getAll({  filter: {    price: { op: "bt", value: "50,200" }  }});// Date rangeconst thisMonth = await api.getAll({  filter: {    createdAt: { op: "bt", value: "2023-01-01,2023-01-31" }  }});```## Error Handling### Initialization Errors```javascriptconst result = await api.getAll();if (result.status === "error") {  console.error("Failed to retrieve data:", result.error);  return;}```### Network Errors- Automatically retries failed API calls- Returns error status with descriptive message- Preserves partial results when possible### Data Processing Errors- Type casting failures fall back to string values- Malformed records are filtered out gracefully- Schema validation errors are logged in debug mode## Caching Behavior### Cache Hit Scenarios- Identical query executed within TTL period- Simple queries using cached sheet data- Query results matching cache key exactly### Cache Miss Scenarios- First execution of query- Query parameters changed- Cache expired due to TTL- Cache evicted due to LRU policy### Cache Invalidation- Automatic on data modification operations- Manual clearing via `clearCaches()` method- Selective invalidation for performance## Performance Optimization Tips### For Large Datasets- Use pagination to limit memory usage- Apply filters early to reduce processing- Select only needed fields- Enable caching for repeated queries### For Real-time Data- Disable caching or use short TTL- Use specific filters to minimize data transfer- Implement polling with change detection### For Complex Queries- Cache results for frequently used queries- Use field selection to reduce payload size- Consider server-side processing for heavy computations</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2554">line 2554</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Propagates unexpected errors during data retrieval or processing
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+<ul>
+        <li>
+<div class="param-desc">
+    Standardized response with status and data array
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.status - Operation status: "success" or "error"
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data - Array of record objects with type-cast values
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;Object></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.error] - Error message if operation failed
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    </ul>
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getById"><span class="type-signature">(async) </span>getById<span class="signature">(idValue)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>|string|Object|string|*|string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves a single record from the Google Sheet by its unique identifier with intelligent caching and type casting.This method provides efficient record retrieval by ID with multiple optimization strategies including record-level caching,automatic type casting, and performance tracking. It implements a comprehensive caching system that balances memory usagewith access speed, ensuring fast lookups for frequently accessed records.## Core Functionality### Record Retrieval Process1. **Input Validation**: Validates ID parameter and initialization status2. **Cache Lookup**: Checks record cache for existing data3. **Row Finding**: Locates the record in the spreadsheet using `findRowById()`4. **Data Mapping**: Maps spreadsheet columns to record fields5. **Type Casting**: Applies schema-based type conversions6. **Cache Storage**: Stores result in record cache for future lookups7. **Response Formatting**: Returns standardized success/error response### Intelligent Caching- **Record-Level Cache**: Individual record caching with TTL- **LRU Eviction**: Automatic cleanup of least recently used entries- **Size Management**: Configurable maximum cache size limits- **Performance Tracking**: Hit/miss statistics for optimization## Caching Strategy### Cache Key Format```"id:{idValue}"```- Example: `"id:user-1234567890"`- Unique per record ID- Enables precise cache invalidation### Cache Duration- Configurable via `recordCacheDuration` setting- Default: 30 minutes (auto-optimized based on user count)- Automatic expiration with timer-based cleanup- Prevents stale data issues### LRU Management- Maintains cache size below `maxRecordCacheSize` limit- Removes oldest entries when limit exceeded- Preserves most recently accessed records- Balances memory usage with performance## Data Processing### Row-to-Record Mapping```javascript// Spreadsheet row: ["user-123", "John", "john@example.com", "30"]// Headers: ["id", "name", "email", "age"]// Result: { id: "user-123", name: "John", email: "john@example.com", age: "30" }```### Type Casting- Applies schema-defined conversions- Handles null/empty values gracefully- Preserves data integrity- Enables type-safe operations## Performance Characteristics### Time Complexity- **O(1)**: Cache hit (immediate return)- **O(n)**: Cache miss (linear search through sheet data)- **O(1)**: Cache storage and LRU management### Memory Usage- **Minimal**: Single record storage in cache- **Controlled**: LRU limits prevent memory exhaustion- **Efficient**: Shared header references### Network Optimization- **Zero calls**: Cache hit scenarios- **Single call**: Cache miss with full sheet fetch- **Minimal payload**: Only required data transferred## Error Conditions### Validation Errors- **Uninitialized API**: `init()` not called- **Invalid ID**: Null, undefined, or non-string parameter- **Empty ID**: Zero-length string provided### Data Errors- **Record Not Found**: ID doesn't exist in spreadsheet- **Sheet Access Error**: Permission or connectivity issues- **Data Corruption**: Malformed spreadsheet data### Cache Errors- **Cache Corruption**: Invalid cached data structure- **Timer Failures**: TTL cleanup system errors## Parameter Specifications
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The unique identifier of the record to retrieve- Must be a non-empty string- Should match an existing record ID in the spreadsheet- Case-sensitive matching- Supports any string format (UUID, auto-generated, custom)## Return Value Structure### Success Response```javascript{  status: "success",  data: {    id: "user-1234567890",    name: "John Doe",    email: "john@example.com",    age: 30,    active: true,    createdAt: new Date("2023-01-15T10:30:00.000Z")  }}```### Error Response```javascript{  status: "error",  data: {}, // Empty object for consistency  error: "Record not found"}```## Usage Examples### Basic Record Retrieval```javascriptconst user = await api.getById("user-1234567890");if (user.status === "success") {  console.log("Found user:", user.data.name);  console.log("Email:", user.data.email);} else {  console.log("User not found:", user.error);}```### Error Handling Patterns```javascripttry {  const result = await api.getById(userId);  if (result.status === "error") {    switch (true) {      case result.error.includes("not found"):        console.log("Record doesn't exist");        break;      case result.error.includes("initialized"):        console.log("API not ready, call init() first");        break;      case result.error.includes("Invalid ID"):        console.log("Invalid ID format provided");        break;      default:        console.log("Retrieval failed:", result.error);    }  } else {    // Process the record    processUser(result.data);  }} catch (unexpectedError) {  console.error("Unexpected error:", unexpectedError);}```### Cache-Aware Usage```javascript// First call - cache missconst user1 = await api.getById("user-123");console.log("Loaded from sheet");// Second call - cache hitconst user2 = await api.getById("user-123");console.log("Loaded from cache");// Data is identicalconsole.log(user1.data === user2.data); // false (different objects)console.log(_.isEqual(user1.data, user2.data)); // true (same content)```### Integration with Other Methods```javascript// Get user by ID, then updateconst user = await api.getById("user-123");if (user.status === "success") {  const updated = await api.update(user.data.id, {    ...user.data,    lastLogin: new Date()  });}// Get user by ID, then deleteconst user = await api.getById("user-123");if (user.status === "success") {  await api.delete(user.data.id);}```## Caching Behavior### Cache Hit Scenarios- Same ID requested within TTL period- Record exists in cache and hasn't expired- Returns deep clone of cached data### Cache Miss Scenarios- First request for this ID- Cached record has expired- Cache entry was evicted due to LRU- Triggers full sheet search### Cache Invalidation- Automatic on record updates/deletions- Manual clearing via `clearCaches()` method- Selective invalidation for data consistency## Performance Optimization Tips### For High-Traffic Records- Cache duration optimized for access patterns- LRU keeps frequently accessed records- Memory limits prevent cache bloat### For Real-Time Data- Use shorter cache durations- Implement cache invalidation strategies- Consider disabling caching for volatile data### For Large Datasets- Pagination reduces initial load time- Field selection minimizes memory usage- Cache warming improves subsequent access## Security Considerations- **ID Validation**: Prevents injection through input validation- **Access Control**: Relies on Google Sheets permission model- **Data Exposure**: Returns full record data (consider field selection)- **Cache Security**: Cached data inherits sheet permissions## Integration Notes- **Type Consistency**: Maintains types through casting- **Cache Coordination**: Works with other caching methods- **Error Propagation**: Consistent error handling patterns- **Async Safety**: Thread-safe for concurrent operations</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3102">line 3102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Propagates unexpected errors during record retrieval or processing
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+<ul>
+        <li>
+<div class="param-desc">
+    Standardized response with retrieval status and record data
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.status - Operation status: "success" or "error"
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data - Retrieved record with type-cast fields (empty object on error)
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data.id - Record identifier
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data.* - All other fields with schema-based typing
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.error] - Descriptive error message if retrieval failed
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    </ul>
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="init"><span class="type-signature">(async) </span>init<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>|string|Object|string|string|Array.&lt;string>|string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Performs comprehensive initialization of the SheetAPI instance, ensuring the Google Sheet is ready for operations.This method executes a complete setup sequence that prepares the spreadsheet for data operations. It handles sheet creation,header initialization, and fires appropriate events to signal readiness or failure. The initialization process is designedto be idempotent and safe to call multiple times.## Initialization Workflow1. **Sheet Creation Check**: If `createIfMissing` is true, attempts to create the sheet if it doesn't exist2. **Header Initialization**: Sets up column headers and validates sheet structure3. **State Management**: Sets the `_initialized` flag to prevent duplicate initialization4. **Event Dispatch**: Fires custom events to notify listeners of initialization status5. **Error Handling**: Comprehensive error handling with detailed error reporting## Conditional Behaviors### Sheet Creation (`createIfMissing = true`)- Checks if the specified sheet exists in the spreadsheet- Creates the sheet with default properties if missing- Returns error if sheet creation fails- Proceeds to header initialization on success### Sheet Creation Disabled (`createIfMissing = false`)- Assumes sheet already exists- Skips creation step entirely- Proceeds directly to header validation## Event SystemThe initialization process dispatches custom events for external monitoring:### Success Event```javascript// Event name: 'sheetapi:ready' or '{name}_ready'window.addEventListener('sheetapi:ready', (event) => {  console.log('SheetAPI initialized successfully');  console.log('API instance:', event.detail.api);  console.log('Status:', event.detail.status); // true});```### Error Event```javascriptwindow.addEventListener('sheetapi:ready', (event) => {  if (!event.detail.status) {    console.error('SheetAPI initialization failed:', event.detail.error);  }});```## Error Conditions### Sheet Creation Failures- **Permission Denied**: Insufficient Google Sheets permissions- **Invalid Spreadsheet ID**: Spreadsheet doesn't exist or is inaccessible- **API Quota Exceeded**: Google API rate limits exceeded- **Network Errors**: Connectivity issues during API calls### Header Initialization Failures- **Sheet Not Found**: Sheet was not created and doesn't exist- **Permission Issues**: Unable to read/write sheet properties- **Invalid Headers**: Header configuration conflicts with existing data## Performance Characteristics### Execution Time- **First Run**: 2-5 seconds (includes sheet creation and header setup)- **Subsequent Runs**: 1-3 seconds (header validation only)- **Cached Runs**: < 500ms (when sheet already exists and is properly configured)### Network Requests- **Sheet Creation**: 1-2 API calls (check existence + create if needed)- **Header Setup**: 1-3 API calls (read sheet + write headers if needed)- **Total**: 2-5 API calls depending on sheet state## State Management### Initialization Flag- Sets `this._initialized = true` on successful completion- Prevents duplicate initialization attempts- Allows other methods to check initialization status### Cache Invalidation- Clears any existing metadata cache- Forces fresh data loading on next operations- Ensures consistency after sheet creation## Security Considerations- **Authentication Validation**: Verifies OAuth2 tokens are valid before API calls- **Permission Checking**: Ensures adequate Google Sheets permissions- **Input Validation**: Validates spreadsheet ID and sheet name formats- **Error Information**: Sanitizes error messages to prevent information leakage## Debug InformationWhen `debug: true`, provides detailed logging:```initCreating sheet 'Users'...Sheet created successfullyInitializing headers...Headers initialized successfullyInitialization complete```## Return Value Structure### Success Response```javascript{  status: "success",  data: {    message: "Sheet initialized successfully",    sheetId: "123456789",    headers: ["id", "name", "email"]  }}```### Error Response```javascript{  status: "error",  error: "Failed to create sheet: Insufficient permissions"}```
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1621">line 1621</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Propagates unexpected errors during initialization process
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+<ul>
+        <li>
+<div class="param-desc">
+    Standardized response object indicating initialization success or failure
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.status - Status indicator: "success" or "error"
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.data] - Success data containing initialization details
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    return.data.message - Human-readable success message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.data.sheetId] - Google Sheet identifier
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.data.headers] - Initialized column headers
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+    </dd>
+</dl>
+</li>
+    
+        <li>
+<div class="param-desc">
+    [return.error] - Error message if initialization failed
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+</li>
+    </ul>
+
+
+
+
+    <h5>Examples</h5>
+    
+    <pre class="prettyprint"><code>// Basic initializationconst api = new SheetAPI({  spreadsheetId: "1abc123...",  accessToken: "ya29...",  sheetName: "Users"});const result = await api.init();if (result.status === "success") {  console.log("API ready for use!");} else {  console.error("Initialization failed:", result.error);}</code></pre>
+
+    <pre class="prettyprint"><code>// Initialization with event handlingconst api = new SheetAPI({  spreadsheetId: "1abc123...",  accessToken: "ya29...",  sheetName: "Products",  name: "ProductAPI"});// Listen for ready eventwindow.addEventListener('ProductAPI_ready', (event) => {  if (event.detail.status) {    console.log('Product API initialized successfully');    // Start using the API    api.create({ name: "Widget", price: 29.99 });  } else {    console.error('Product API failed:', event.detail.error);  }});// Start initializationawait api.init();</code></pre>
+
+    <pre class="prettyprint"><code>// Error handling patternstry {  const result = await api.init();  if (result.status === "error") {    switch (true) {      case result.error.includes("permissions"):        console.log("Check Google Sheets sharing settings");        break;      case result.error.includes("spreadsheet"):        console.log("Verify spreadsheet ID is correct");        break;      default:        console.log("General initialization error");    }  }} catch (unexpectedError) {  console.error("Unexpected error during init:", unexpectedError);}</code></pre>
+
+
+
+        
     
 
     
@@ -176,13 +1829,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SheetAPI.html">SheetAPI</a></li><li><a href="SheetAPITokenManager.html">SheetAPITokenManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#baseURL">baseURL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SheetAPI.html">SheetAPI</a></li><li><a href="SheetAPITokenManager.html">SheetAPITokenManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#create">create</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getById">getById</a></li><li><a href="global.html#init">init</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Nov 13 2025 02:24:54 GMT+0200 (South Africa Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Nov 13 2025 03:00:18 GMT+0200 (South Africa Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>SheetAPI<span class="signature">(config)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>SheetAPI<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">SheetAPI - Google Sheets Database WrapperA comprehensive JavaScript library that transforms Google Sheets into a powerful,REST-style database backend. Provides full CRUD operations, advanced querying,intelligent caching, and automatic type casting.</div>
+            <div class="class-description">Comprehensive Google Sheets API wrapper providing full CRUD operations, advanced querying, caching, and type-safe data management.## Core Features### Data Operations- **Full CRUD Support**: Create, read, update, delete operations with automatic ID generation- **Advanced Querying**: Filter, sort, paginate, and search across sheet data- **Type Safety**: Automatic type casting and validation based on schema definitions- **Batch Operations**: Efficient bulk operations for multiple records### Caching System- **Multi-Level Caching**: Data cache, record cache, and query result cache- **TTL Management**: Time-based expiration with automatic cleanup- **Performance Tracking**: Cache hit/miss statistics and optimization metrics- **Auto-Optimization**: Dynamic cache duration adjustment based on usage patterns### Authentication & Security- **OAuth2 Integration**: Automatic token refresh and management- **Secure Token Handling**: Encrypted storage and secure transmission- **Rate Limiting**: Built-in request throttling and retry logic- **Error Recovery**: Comprehensive error handling with detailed diagnostics### Data Management- **Schema Definition**: Flexible column definitions with type specifications- **Data Validation**: Input validation and type coercion- **ID Generation**: Automatic unique identifier creation- **Data Transformation**: Custom field mapping and processing## Architecture OverviewThe SheetAPI class implements a layered architecture:```┌─────────────────┐│   SheetAPI      │ ← Public API layer│   (Main Class)  │└─────────────────┘        │        ▼┌─────────────────┐│ SheetAPIToken-  │ ← Authentication layer│     Manager     │└─────────────────┘        │        ▼┌─────────────────┐│  Google Sheets  │ ← External API layer│      API v4     │└─────────────────┘```### Layer Responsibilities**Public API Layer (SheetAPI)**:- High-level CRUD operations- Query processing and optimization- Cache management and invalidation- Data transformation and validation- Error handling and user feedback**Authentication Layer (SheetAPITokenManager)**:- OAuth2 token lifecycle management- Automatic token refresh- Secure HTTP request authentication- Rate limiting and retry logic**External API Layer (Google Sheets API v4)**:- Raw HTTP communication- API-specific request formatting- Response parsing and normalization## Performance Characteristics### Caching Strategy- **Data Cache**: Full sheet data cached for 15-60 minutes (user-dependent)- **Record Cache**: Individual records cached for 30-120 minutes- **Query Cache**: Query results cached for 10-40 minutes- **Auto-optimization**: Cache durations adjust based on user count and access patterns### Optimization Features- **Lazy Loading**: Data loaded only when needed- **Incremental Updates**: Only changed data transmitted- **Batch Processing**: Multiple operations combined for efficiency- **Connection Pooling**: Reused HTTP connections for reduced latency## Usage Patterns### Basic CRUD Operations```javascriptconst api = new SheetAPI({  spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",  accessToken: "ya29...",  sheetName: "Users",  headers: ["id", "name", "email", "age"]});await api.init();// Createconst user = await api.create({ name: "John Doe", email: "john@example.com", age: 30 });console.log(user.id); // Auto-generated ID// Readconst allUsers = await api.getAll();const specificUser = await api.getById(user.id);// Updateawait api.update(user.id, { age: 31 });// Deleteawait api.delete(user.id);```### Advanced Querying```javascript// Filter and sortconst activeUsers = await api.getAll({  filter: { status: "active" },  sort: { name: "asc" },  limit: 10});// Search across multiple fieldsconst searchResults = await api.search("john", ["name", "email"]);// Paginated resultsconst page1 = await api.getAll({ page: 1, limit: 50 });const page2 = await api.getAll({ page: 2, limit: 50 });```### Schema Definition```javascriptconst api = new SheetAPI({  spreadsheetId: "your-id",  accessToken: "your-token",  sheetName: "Products",  headers: [    "id",    { name: "name", type: "string" },    { name: "price", type: "number" },    { name: "inStock", type: "boolean" },    { name: "createdAt", type: "date" }  ]});```### Cache Configuration```javascriptconst api = new SheetAPI({  // ... other config  cache: {    userCount: 100,        // Optimize for 100 concurrent users    durationUnit: 'hours', // Use hours instead of minutes    maxRecordCacheSize: 200 // Cache up to 200 records  }});```## Error HandlingThe SheetAPI provides comprehensive error handling with detailed error messages:```javascripttry {  await api.create({ name: "John" });} catch (error) {  if (error.code === 'VALIDATION_ERROR') {    console.log('Validation failed:', error.details);  } else if (error.code === 'AUTH_ERROR') {    console.log('Authentication failed, token may be expired');  } else if (error.code === 'NETWORK_ERROR') {    console.log('Network issue, will retry automatically');  }}```## Security Considerations### Token Security- Access tokens are never stored in plain text- Refresh tokens are encrypted using client credentials- Automatic token rotation prevents token exhaustion- Secure HTTPS-only communication with Google APIs### Data Protection- Input validation prevents injection attacks- Type coercion ensures data integrity- Rate limiting prevents abuse- Audit logging for sensitive operations### Access Control- OAuth2 scopes limit API permissions- Sheet-level access control through Google Sheets permissions- Row-level security through application logic## Performance Optimization### Caching Best Practices- Cache durations auto-adjust based on data volatility- Cache invalidation on data modifications- Memory-efficient cache storage with size limits- Cache statistics for monitoring and tuning### Query Optimization- Client-side filtering reduces API calls- Pagination prevents large data transfers- Batch operations combine multiple requests- Connection reuse minimizes latency## ExtensibilityThe SheetAPI is designed for extension through:- Custom data transformers- Plugin architecture for additional features- Event hooks for operation monitoring- Custom validation rules- Integration with other data sources## Dependencies- **SheetAPITokenManager**: Handles OAuth2 authentication- **Google Sheets API v4**: External REST API for sheet operations- **Fetch API**: Modern HTTP client for API communication- **ES6+ Features**: Promises, async/await, Map, Set## Browser Compatibility- Modern browsers with ES6+ support- Node.js 14+ with fetch polyfill- HTTPS required for OAuth2 security- CORS-enabled environments for web applications</div>
         
     
 </header>
@@ -45,771 +45,19 @@
     
 
     
-    <h4 class="name" id="SheetAPI"><span class="type-signature"></span>new SheetAPI<span class="signature">(config)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="SheetAPI"><span class="type-signature"></span>new SheetAPI<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
 
 
 
-<div class="description">
-    Constructor: Initializes the SheetAPI instance
-</div>
 
 
 
 
 
 
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>config</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Configuration object
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>spreadsheetId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Google Sheet ID</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>accessToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">OAuth2 token with Sheets API access</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>refreshToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">OAuth2 refresh token</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>clientId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">OAuth2 client ID (required if using refreshToken)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>clientSecret</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">OAuth2 client secret (required if using refreshToken)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sheetName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Name of the sheet/tab</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>headers</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;(string|Object)></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    []
-                
-                </td>
-            
-
-            <td class="description last">Optional array of headers for the sheet  Can be array of strings: ["id","name","age"] or objects: [{name:"id",type:"string"},{name:"age",type:"number"}]  Supported types: "string", "number", "integer", "double", "boolean", "date"</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>createIfMissing</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last">Create sheet if missing</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>debug</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Optional debug flag</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cache</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Cache configuration for single-user applications
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>userCount</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    1
-                
-                </td>
-            
-
-            <td class="description last">Number of concurrent users (auto-optimizes cache durations). Set to 0 to disable all caching for real-time experience.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>durationUnit</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    'minutes'
-                
-                </td>
-            
-
-            <td class="description last">Unit for duration values: 'milliseconds', 'seconds', 'minutes', 'hours'</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dataCacheDuration</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Data cache duration (auto-calculated based on userCount)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>recordCacheDuration</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Record cache duration (auto-calculated based on userCount)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>queryCacheDuration</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Query result cache duration (auto-calculated based on userCount)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>maxRecordCacheSize</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    100
-                
-                </td>
-            
-
-            <td class="description last">Maximum records in cache (default 100)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>enableQueryCaching</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last">Enable caching of query results</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -819,7 +67,13 @@
 <dl class="details">
 
     
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
 
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
     
 
     
@@ -835,9 +89,19 @@
     
 
     
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>SheetAPI Development Team</li>
+        </ul>
+    </dd>
+    
 
     
 
+    
+    <dt class="tag-license">License:</dt>
+    <dd class="tag-license"><ul class="dummy"><li>MIT</li></ul></dd>
     
 
     
@@ -845,7 +109,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line174">line 174</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line598">line 598</a>
     </li></ul></dd>
     
 
@@ -874,9 +138,13 @@
 
 
 
-    <h5>Example</h5>
+    <h5>Examples</h5>
     
-    <pre class="prettyprint"><code>// Basic usageconst api = new SheetAPI({  spreadsheetId: "your-spreadsheet-id",  accessToken: "your-oauth-token",  sheetName: "Users"});// Initialize and useawait api.init();// Create a recordconst result = await api.create({ name: "John", age: 30 });// Get all recordsconst users = await api.getAll();// Find by IDconst user = await api.getById("user-123");</code></pre>
+    <pre class="prettyprint"><code>// Complete setup and usage exampleconst api = new SheetAPI({  spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",  accessToken: "ya29.a0AfH6SMC...",  sheetName: "Users",  headers: [    "id",    { name: "name", type: "string" },    { name: "email", type: "string" },    { name: "age", type: "number" },    { name: "active", type: "boolean" }  ],  debug: true});// Initialize the APIawait api.init();// Perform operationsconst user = await api.create({  name: "Jane Smith",  email: "jane@example.com",  age: 28,  active: true});console.log(`Created user with ID: ${user.id}`);</code></pre>
+
+    <pre class="prettyprint"><code>// Advanced configuration with cachingconst api = new SheetAPI({  spreadsheetId: "your-spreadsheet-id",  refreshToken: "1//refresh-token",  clientId: "your-client-id",  clientSecret: "your-client-secret",  sheetName: "Products",  headers: ["id", "name", "price", "category"],  cache: {    userCount: 50,    durationUnit: 'minutes',    maxRecordCacheSize: 150  },  createIfMissing: true});</code></pre>
+
+    <pre class="prettyprint"><code>// Error handling patternstry {  const users = await api.getAll();  console.log(`Found ${users.length} users`);} catch (error) {  switch (error.code) {    case 'AUTH_ERROR':      console.error('Authentication failed:', error.message);      break;    case 'NETWORK_ERROR':      console.error('Network issue:', error.message);      break;    case 'VALIDATION_ERROR':      console.error('Data validation failed:', error.details);      break;    default:      console.error('Unknown error:', error);  }}</code></pre>
 
 
 
@@ -1007,7 +275,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2090">line 2090</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3881">line 3881</a>
     </li></ul></dd>
     
 
@@ -1171,7 +439,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1951">line 1951</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3742">line 3742</a>
     </li></ul></dd>
     
 
@@ -1335,7 +603,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2002">line 2002</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3793">line 3793</a>
     </li></ul></dd>
     
 
@@ -1450,7 +718,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line534">line 534</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1466">line 1466</a>
     </li></ul></dd>
     
 
@@ -1477,285 +745,6 @@
 
 
 
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="create"><span class="type-signature">(async) </span>create<span class="signature">(record)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    CREATE a new record
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>record</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The record object to create</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1095">line 1095</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Standard {status, data, error} response
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Create a user record (ID auto-generated if not provided)const result = await api.create({  name: "John Doe",  email: "john@example.com",  age: 30});// result: { status: "success", data: { id: "abc123", name: "John Doe", ... } }</code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="createSheetIfMissing"><span class="type-signature">(async) </span>createSheetIfMissing<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Create sheet/tab if missing
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line869">line 869</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    {status, data, error}
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>api.createSheetIfMissing().then(console.log);</code></pre>
 
 
 
@@ -1773,7 +762,7 @@
 
 
 <div class="description">
-    DELETE ALL records (keeps headers)
+    Delete all records (keeps headers)
 </div>
 
 
@@ -1817,7 +806,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1157">line 1157</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2503">line 2503</a>
     </li></ul></dd>
     
 
@@ -1846,7 +835,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data, error} response
+    Returns success message or error
 </div>
 
 
@@ -1870,7 +859,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const result = await api.deleteAll();// Clears all data rows but keeps column headers</code></pre>
+    <pre class="prettyprint"><code>const result = await api.deleteAll();</code></pre>
 
 
 
@@ -1888,7 +877,7 @@
 
 
 <div class="description">
-    DELETE record by any field value
+    Delete records by field value
 </div>
 
 
@@ -2010,7 +999,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1016">line 1016</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2145">line 2145</a>
     </li></ul></dd>
     
 
@@ -2039,7 +1028,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data, error} response
+    Returns success message or error
 </div>
 
 
@@ -2081,7 +1070,7 @@
 
 
 <div class="description">
-    DELETE record by ID
+    Delete a record by its ID
 </div>
 
 
@@ -2174,7 +1163,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1802">line 1802</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3600">line 3600</a>
     </li></ul></dd>
     
 
@@ -2203,7 +1192,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data: Object, error} response
+    Returns success with deleted record or error message
 </div>
 
 
@@ -2227,226 +1216,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const result = await api.deleteById("user-123");// result: { status: "success", data: { id: "user-123", name: "John", ... } }</code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="fetchSheet"><span class="type-signature">(async) </span>fetchSheet<span class="signature">(range, useCache<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Internal helper: fetches data from a sheet range
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>range</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">e.g., 'Sheet1!A1:C10'</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>useCache</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last">Whether to use cached data if available</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line774">line 774</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    {status, data, error}
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>api.fetchSheet("Users!A1:C10").then(console.log);</code></pre>
+    <pre class="prettyprint"><code>const result = await api.deleteById("user-123");</code></pre>
 
 
 
@@ -2557,7 +1327,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1903">line 1903</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3694">line 3694</a>
     </li></ul></dd>
     
 
@@ -2736,7 +1506,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line977">line 977</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2114">line 2114</a>
     </li></ul></dd>
     
 
@@ -2799,449 +1569,6 @@
     
 
     
-    <h4 class="name" id="getAll"><span class="type-signature">(async) </span>getAll<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    GET ALL records with advanced filtering, sorting, and pagination
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    {}
-                
-                </td>
-            
-
-            <td class="description last">Query options
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>filter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Filter criteria (key-value pairs)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sort</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Array.&lt;(string|number)>></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Sort criteria [['field', 'asc|desc'], ...]</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fields</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Fields to return (projection)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>limit</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Maximum records to return (default: 1000 for memory efficiency)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>offset</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Number of records to skip</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>page</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Page number (alternative to offset)</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>perPage</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Records per page (alternative to limit)</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1265">line 1265</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Standard {status, data: Array, error} response
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// Get all recordsconst all = await api.getAll();// Filter recordsconst activeUsers = await api.getAll({  filter: { status: "active" }});// Sort and limitconst recentUsers = await api.getAll({  sort: [["created", "desc"]],  limit: 10});// Paginationconst page2 = await api.getAll({  page: 2,  perPage: 50});// Field selectionconst namesOnly = await api.getAll({  fields: ["id", "name"]});</code></pre>
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="getByField"><span class="type-signature">(async) </span>getByField<span class="signature">(fieldName, value)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
     
 
@@ -3250,7 +1577,7 @@
 
 
 <div class="description">
-    GET record by any field value
+    Get a record by any field value
 </div>
 
 
@@ -3372,7 +1699,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1592">line 1592</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3431">line 3431</a>
     </li></ul></dd>
     
 
@@ -3401,7 +1728,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data: Object, error} response
+    Returns success with the record or error message
 </div>
 
 
@@ -3425,171 +1752,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// Find user by emailconst user = await api.getByField("email", "john@example.com");</code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getById"><span class="type-signature">(async) </span>getById<span class="signature">(idValue)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    GET record by ID
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>idValue</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The record ID to find</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1519">line 1519</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Standard {status, data: Object, error} response
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const user = await api.getById("user-123");// result: { status: "success", data: { id: "user-123", name: "John", ... } }</code></pre>
+    <pre class="prettyprint"><code>const user = await api.getByField("email", "john@example.com");</code></pre>
 
 
 
@@ -3651,7 +1814,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line498">line 498</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1430">line 1430</a>
     </li></ul></dd>
     
 
@@ -3717,7 +1880,7 @@
 
 
 <div class="description">
-    GET record ID by any field value
+    Get record ID by field value
 </div>
 
 
@@ -3839,7 +2002,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1683">line 1683</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3512">line 3512</a>
     </li></ul></dd>
     
 
@@ -3868,7 +2031,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data: string, error} response
+    Returns success with the ID or error message
 </div>
 
 
@@ -3892,7 +2055,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// Get user ID by emailconst userId = await api.getIdByField("email", "john@example.com");// result: { status: "success", data: "user-123" }</code></pre>
+    <pre class="prettyprint"><code>const userId = await api.getIdByField("email", "john@example.com");</code></pre>
 
 
 
@@ -3954,7 +2117,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line490">line 490</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1422">line 1422</a>
     </li></ul></dd>
     
 
@@ -4003,341 +2166,6 @@
     
 
 
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getSheetMeta"><span class="type-signature">(async) </span>getSheetMeta<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Helper: Fetches sheet metadata (sheetId, rowCount, etc) for this.sheetName
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line731">line 731</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    {status, data: {sheetId, rowCount, properties, sheetObj}, error}
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="init"><span class="type-signature">(async) </span>init<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Initialize the API: creates sheet if missing and initializes headers
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line692">line 692</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Standard {status, data, error} response
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="initHeaders"><span class="type-signature">(async) </span>initHeaders<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Initialize headers: read from sheet or write provided headers
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line842">line 842</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    {status, data, error}
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>api.initHeaders().then(console.log);</code></pre>
 
 
 
@@ -4448,7 +2276,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1890">line 1890</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3681">line 3681</a>
     </li></ul></dd>
     
 
@@ -4519,7 +2347,7 @@
 
 
 <div class="description">
-    GET the number of data rows in the sheet
+    Get the number of data rows in the sheet
 </div>
 
 
@@ -4563,7 +2391,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1480">line 1480</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3078">line 3078</a>
     </li></ul></dd>
     
 
@@ -4592,7 +2420,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data: number, error} response
+    Returns success with the count or error message
 </div>
 
 
@@ -4616,7 +2444,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const count = await api.rowCount();// result: { status: "success", data: 150 }</code></pre>
+    <pre class="prettyprint"><code>const count = await api.rowCount();</code></pre>
 
 
 
@@ -4739,7 +2567,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1851">line 1851</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3649">line 3649</a>
     </li></ul></dd>
     
 
@@ -4810,7 +2638,7 @@
 
 
 <div class="description">
-    UPDATE record by object (extracts id and calls updateById)
+    Update a record using an object that includes the ID
 </div>
 
 
@@ -4862,7 +2690,7 @@
 
             
 
-            <td class="description last">The record object, must include 'id'</td>
+            <td class="description last">The record data including ID</td>
         </tr>
 
     
@@ -4903,7 +2731,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1778">line 1778</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3584">line 3584</a>
     </li></ul></dd>
     
 
@@ -4932,7 +2760,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data, error} response
+    Returns success with updated record or error message
 </div>
 
 
@@ -4974,7 +2802,7 @@
 
 
 <div class="description">
-    UPDATE record by ID (supports partial updates)
+    Update a record by its ID
 </div>
 
 
@@ -5049,7 +2877,7 @@
 
             
 
-            <td class="description last">Object with fields to update</td>
+            <td class="description last">The fields to update</td>
         </tr>
 
     
@@ -5090,7 +2918,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1714">line 1714</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3527">line 3527</a>
     </li></ul></dd>
     
 
@@ -5119,7 +2947,7 @@
 
         
 <div class="param-desc">
-    Standard {status, data: Object, error} response
+    Returns success with updated record or error message
 </div>
 
 
@@ -5143,17 +2971,44 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// Partial updateconst result = await api.updateById("user-123", { status: "inactive" });// Full updateconst result = await api.updateById("user-123", {  name: "John Smith",  email: "johnsmith@example.com",  age: 31});</code></pre>
+    <pre class="prettyprint"><code>const result = await api.updateById("user-123", { status: "inactive" });</code></pre>
 
 
 
         
-            
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>SheetAPI<span class="signature">(config)</span><span class="type-signature"></span></h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
 
     
 
     
-    <h4 class="name" id="warmCache"><span class="type-signature">(async) </span>warmCache<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    <h4 class="name" id="SheetAPI"><span class="type-signature"></span>new SheetAPI<span class="signature">(config)</span><span class="type-signature"></span></h4>
     
 
     
@@ -5161,7 +3016,7 @@
 
 
 <div class="description">
-    Warm up caches by pre-loading frequently accessed data
+    Initializes a new SheetAPI instance with comprehensive configuration for Google Sheets operations.This constructor performs extensive validation, schema processing, authentication setup, and cache configurationto create a fully functional Google Sheets API wrapper. It implements intelligent defaults and auto-optimizationbased on the provided configuration parameters.## Initialization Process1. **Parameter Validation**: Validates all required and optional parameters2. **Schema Processing**: Processes header definitions and creates type schema3. **Authentication Setup**: Configures OAuth2 token management if needed4. **Cache Configuration**: Auto-calculates optimal cache settings based on user count5. **Instance Setup**: Initializes all internal state and data structures## Parameter Requirements### Required Parameters- `spreadsheetId`: The unique identifier of your Google Spreadsheet- `sheetName`: The name of the worksheet tab within the spreadsheet- **Authentication**: Either `accessToken` OR all of `refreshToken`, `clientId`, `clientSecret`### Authentication Options**Option 1: Direct Access Token**```javascriptconst api = new SheetAPI({  spreadsheetId: "1abc...",  accessToken: "ya29.abc...",  sheetName: "Data"});```**Option 2: Refresh Token (Recommended)**```javascriptconst api = new SheetAPI({  spreadsheetId: "1abc...",  refreshToken: "1//refresh-token",  clientId: "your-client-id",  clientSecret: "your-client-secret",  sheetName: "Data"});```## Schema DefinitionThe `headers` parameter supports two formats for flexible schema definition:### Simple String Format```javascriptheaders: ["id", "name", "email", "age"]// All columns default to 'string' type```### Advanced Object Format```javascriptheaders: [  "id",  // Simple string, defaults to 'string' type  { name: "name", type: "string" },  { name: "age", type: "number" },  { name: "active", type: "boolean" },  { name: "createdAt", type: "date" }]```### Supported Data Types- `"string"`: Text data (default)- `"number"`: Numeric data with automatic parsing- `"boolean"`: True/false values- `"date"`: Date/time values with ISO parsing## Cache ConfigurationThe caching system auto-optimizes based on the `userCount` parameter:### Auto-Optimization Logic- **userCount = 0**: Disables all caching for real-time experience- **userCount = 1**: Optimized for single-user applications (default)- **userCount > 1**: Scales cache durations based on concurrent users### Cache Types- **Data Cache**: Full sheet data caching- **Record Cache**: Individual record caching with LRU eviction- **Query Cache**: Query result caching for performance### Duration Calculation```javascript// Base durations (single user, minutes)const baseDurations = {  data: 15,      // 15 minutes  record: 30,    // 30 minutes  query: 10      // 10 minutes};// Multiplier based on user countconst userMultiplier = Math.max(0.1, 1 / Math.log10(userCount + 1));// Final duration in millisecondsduration = baseDuration * userMultiplier * 60000;```## Error ConditionsThe constructor throws detailed errors for invalid configurations:```javascript// Missing spreadsheetIdthrow new Error("spreadsheetId is required");// Missing sheetNamethrow new Error("sheetName is required");// Invalid authenticationthrow new Error("Either accessToken or all of refreshToken, clientId, and clientSecret are required");```## Performance Considerations### Memory Usage- Cache sizes scale with user count- Record cache limited to prevent memory exhaustion- Automatic cleanup of expired cache entries### Initialization Time- Schema processing: O(n) where n = number of headers- Cache configuration: O(1) with mathematical calculations- Token manager setup: O(1) for refresh token validation## Security Features- **Token Validation**: Ensures authentication parameters are complete- **Input Sanitization**: Validates spreadsheet ID and sheet name formats- **Secure Defaults**: Conservative cache settings for data protection- **Audit Logging**: Debug mode provides detailed initialization logs## Debug InformationWhen `debug: true`, the constructor provides detailed logging:```Cache auto-optimized for 1 users: {  dataCache: 15,  recordCache: 30,  queryCache: 10,  unit: 'minutes'}```
 </div>
 
 
@@ -5197,7 +3052,7 @@
 
         <tr>
             
-                <td class="name"><code>options</code></td>
+                <td class="name"><code>config</code></td>
             
 
             <td class="type">
@@ -5213,7 +3068,7 @@
 
             
 
-            <td class="description last">Cache warming options
+            <td class="description last">Comprehensive configuration object for SheetAPI initialization
                 <h6>Properties</h6>
                 
 
@@ -5243,7 +3098,264 @@
 
         <tr>
             
-                <td class="name"><code>warmData</code></td>
+                <td class="name"><code>spreadsheetId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The unique Google Spreadsheet identifier (required)  - Format: Typically 44 characters with dashes (e.g., "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms")  - Must be accessible with the provided authentication credentials  - Can be found in the Google Sheets URL: https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>accessToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">OAuth2 access token for immediate API access  - Short-lived token (typically 1 hour)  - Must have appropriate Google Sheets API scopes  - Required if not using refresh token authentication  - Example: "ya29.a0AfH6SMCaR9..."</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>refreshToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">OAuth2 refresh token for long-term access  - Long-lived token for automatic access token renewal  - Obtained during initial OAuth2 authorization flow  - Required with clientId and clientSecret for automatic token management  - Example: "1//04R9..."</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clientId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">OAuth2 client identifier from Google Cloud Console  - Public identifier for your OAuth2 application  - Required when using refresh token authentication  - Format: "{random-string}.apps.googleusercontent.com"</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clientSecret</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">OAuth2 client secret from Google Cloud Console  - Private secret for your OAuth2 application  - Required when using refresh token authentication  - Must be kept secure and never exposed in client-side code</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sheetName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Name of the worksheet tab within the spreadsheet (required)  - Case-sensitive sheet name as displayed in Google Sheets  - Must exist in the spreadsheet or createIfMissing must be true  - Example: "Sheet1", "Users", "Products"</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>headers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;(string|Object)></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    []
+                
+                </td>
+            
+
+            <td class="description last">Column definitions for data schema  - Array of column names or column definition objects  - Determines data structure and type validation  - Used for automatic type casting and validation  - Simple format: ["id", "name", "email"]  - Advanced format: [{name: "id", type: "string"}, {name: "age", type: "number"}]</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>createIfMissing</code></td>
             
 
             <td class="type">
@@ -5275,20 +3387,20 @@
                 </td>
             
 
-            <td class="description last">Pre-load full sheet data</td>
+            <td class="description last">Auto-create sheet if it doesn't exist  - When true: Creates the sheet tab if not found  - When false: Throws error if sheet doesn't exist  - Useful for preventing accidental sheet creation  - Default: true for development convenience</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>warmRecords</code></td>
+                <td class="name"><code>debug</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -5309,25 +3421,25 @@
             
                 <td class="default">
                 
-                    []
+                    false
                 
                 </td>
             
 
-            <td class="description last">Array of record IDs to pre-load</td>
+            <td class="description last">Enable detailed logging and debug information  - When true: Logs initialization details, cache operations, API calls  - When false: Minimal logging for production use  - Useful for troubleshooting and development  - Performance impact: Minimal (console.log calls)</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>warmQueries</code></td>
+                <td class="name"><code>cache</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Object</span>
 
 
             
@@ -5348,12 +3460,237 @@
             
                 <td class="default">
                 
-                    []
+                    {}
                 
                 </td>
             
 
-            <td class="description last">Array of query options to pre-load</td>
+            <td class="description last">Advanced cache configuration for performance optimization
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>userCount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">Expected number of concurrent users  - Used for auto-optimization of cache durations  - 0 = disable all caching, 1 = single user, >1 = multi-user scaling  - Affects cache duration calculations</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>durationUnit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'minutes'
+                
+                </td>
+            
+
+            <td class="description last">Unit for cache duration calculations  - Supported: 'milliseconds', 'seconds', 'minutes', 'hours'  - Affects how duration multipliers are applied  - Default 'minutes' for user-friendly configuration</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxRecordCacheSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    100
+                
+                </td>
+            
+
+            <td class="description last">Maximum cached records  - Limits memory usage for record cache  - LRU eviction when limit exceeded  - Balance between memory usage and performance</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>enableQueryCaching</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Enable query result caching  - Caches filtered, sorted, and paginated results  - Improves performance for repeated queries  - Can be disabled for highly dynamic data</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">Optional instance name for debugging  - Used in debug logs to identify multiple instances  - Helpful when using multiple SheetAPI instances  - Example: "UserAPI", "ProductAPI"</td>
         </tr>
 
     
@@ -5375,7 +3712,13 @@
 <dl class="details">
 
     
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    
 
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.0.0</li></ul></dd>
     
 
     
@@ -5401,7 +3744,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line556">line 556</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1197">line 1197</a>
     </li></ul></dd>
     
 
@@ -5424,34 +3767,153 @@
 
 
 
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    {status, data: {dataCache, recordCache, queryCache}, error}
-</div>
-
-
+<h5>Throws:</h5>
+<ul>
+        <li>
 
 <dl>
     <dt>
-        Type
+        <div class="param-desc">
+        When spreadsheetId is missing or invalid
+        </div>
     </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
 
 
-    </dd>
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
 </dl>
+
+</li>
+    
+        <li>
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        When sheetName is missing or invalid
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+</li>
+    
+        <li>
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        When authentication parameters are incomplete
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+</li>
+    
+        <li>
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        When headers array contains invalid definitions
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+</li>
+    </ul>
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+    <pre class="prettyprint"><code>// Basic setup with access tokenconst api = new SheetAPI({  spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",  accessToken: "ya29.a0AfH6SMCaR9dX8...",  sheetName: "Users",  headers: ["id", "name", "email", "department"]});</code></pre>
+
+    <pre class="prettyprint"><code>// Advanced setup with refresh token and schemaconst api = new SheetAPI({  spreadsheetId: "1abc123def456",  refreshToken: "1//04R9X8...",  clientId: "123456789-abc.apps.googleusercontent.com",  clientSecret: "GOCSPX-xyz123",  sheetName: "Products",  headers: [    { name: "id", type: "string" },    { name: "name", type: "string" },    { name: "price", type: "number" },    { name: "inStock", type: "boolean" },    { name: "createdAt", type: "date" }  ],  createIfMissing: false,  debug: true,  cache: {    userCount: 50,    durationUnit: 'hours',    maxRecordCacheSize: 200  },  name: "ProductInventory"});</code></pre>
+
+    <pre class="prettyprint"><code>// Real-time setup (no caching)const api = new SheetAPI({  spreadsheetId: "1xyz789",  accessToken: "ya29.token...",  sheetName: "LiveData",  headers: ["timestamp", "value"],  cache: { userCount: 0 } // Disable all caching});</code></pre>
+
+    <pre class="prettyprint"><code>// Error handling for invalid configurationtry {  const api = new SheetAPI({    // Missing required parameters    sheetName: "Data"  });} catch (error) {  console.error("Configuration error:", error.message);  // Output: "spreadsheetId is required"}</code></pre>
+
+
+
+    
+    </div>
 
     
 
+    
 
+    
 
+    
 
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
@@ -5459,7 +3921,7 @@
     
 
     
-    <h4 class="name" id="writeHeaders"><span class="type-signature">(async) </span>writeHeaders<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    <h4 class="name" id="batchDelete"><span class="type-signature">(async) </span>batchDelete<span class="signature">(ids)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
     
 
     
@@ -5467,7 +3929,7 @@
 
 
 <div class="description">
-    Write headers to the first row
+    Batch delete multiple records by ID
 </div>
 
 
@@ -5476,6 +3938,55 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ids</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of record IDs to delete</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -5511,7 +4022,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line925">line 925</a>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3881">line 3881</a>
     </li></ul></dd>
     
 
@@ -5540,7 +4051,7 @@
 
         
 <div class="param-desc">
-    {status, data, error}
+    Standard {status, data: Array, error} response
 </div>
 
 
@@ -5564,7 +4075,2650 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>api.writeHeaders().then(console.log);</code></pre>
+    <pre class="prettyprint"><code>const result = await api.batchDelete(["user-1", "user-2", "user-3"]);</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="batchInsert"><span class="type-signature">(async) </span>batchInsert<span class="signature">(records)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Batch insert multiple records
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>records</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of record objects to insert</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3742">line 3742</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Standard {status, data: Array, error} response
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const users = [  { name: "John", email: "john@example.com" },  { name: "Jane", email: "jane@example.com" }];const result = await api.batchInsert(users);// IDs are auto-generated if not provided</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="batchUpdate"><span class="type-signature">(async) </span>batchUpdate<span class="signature">(updates)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Batch update multiple records by ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>updates</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of update objects, each must have an 'id' property</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3793">line 3793</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Standard {status, data: Array, error} response
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const updates = [  { id: "user-1", status: "active" },  { id: "user-2", status: "inactive" }];const result = await api.batchUpdate(updates);</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="clearCaches"><span class="type-signature"></span>clearCaches<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Clear all caches manually
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1466">line 1466</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteAll"><span class="type-signature">(async) </span>deleteAll<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Delete all records (keeps headers)
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2503">line 2503</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success message or error
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const result = await api.deleteAll();</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteBy"><span class="type-signature">(async) </span>deleteBy<span class="signature">(fieldName, value)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Delete records by field value
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the field to search</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Value to match for deletion</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2145">line 2145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success message or error
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const result = await api.deleteBy("email", "john@example.com");</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="deleteById"><span class="type-signature">(async) </span>deleteById<span class="signature">(idValue)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Delete a record by its ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The record ID to delete</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3600">line 3600</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with deleted record or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const result = await api.deleteById("user-123");</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="findRowById"><span class="type-signature">(async) </span>findRowById<span class="signature">(idValue)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Internal helper: find a row by ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Record ID</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3694">line 3694</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    {status, data: {rowData, rowIndex, sheetId}, error}
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="generateUniqueId"><span class="type-signature"></span>generateUniqueId<span class="signature">(len<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Generate a unique ID for records
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>len</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    15
+                
+                </td>
+            
+
+            <td class="description last">Length of the ID to generate</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line2114">line 2114</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A unique alphanumeric ID
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const id = api.generateUniqueId();// result: "a1b2c3d4e5f6g7h"</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getByField"><span class="type-signature">(async) </span>getByField<span class="signature">(fieldName, value)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get a record by any field value
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the field to search</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Value to match</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3431">line 3431</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with the record or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const user = await api.getByField("email", "john@example.com");</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getCacheStats"><span class="type-signature"></span>getCacheStats<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get cache statistics for debugging
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1430">line 1430</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Cache stats
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getIdByField"><span class="type-signature">(async) </span>getIdByField<span class="signature">(fieldName, value)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get record ID by field value
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the field to search</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Value to match</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3512">line 3512</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with the ID or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const userId = await api.getIdByField("email", "john@example.com");</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getSchema"><span class="type-signature"></span>getSchema<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the current schema (field types)
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line1422">line 1422</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Schema object with field names as keys and types as values
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="recordExists"><span class="type-signature">(async) </span>recordExists<span class="signature">(idValue)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    CHECK if a record exists by ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The record ID to check</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3681">line 3681</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Standard {status, data: boolean, error} response
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const exists = await api.recordExists("user-123");// result: { status: "success", data: true } or { status: "error", data: false }</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="rowCount"><span class="type-signature">(async) </span>rowCount<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the number of data rows in the sheet
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3078">line 3078</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with the count or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const count = await api.rowCount();</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="sheetExists"><span class="type-signature">(async) </span>sheetExists<span class="signature">(sheetName<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    CHECK if a sheet exists
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sheetName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Name of sheet to check (defaults to configured sheetName)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3649">line 3649</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Standard {status, data: boolean, error} response
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const exists = await api.sheetExists("Users");// result: { status: "success", data: true }</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="update"><span class="type-signature">(async) </span>update<span class="signature">(record)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update a record using an object that includes the ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>record</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The record data including ID</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3584">line 3584</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with updated record or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const result = await api.update({ id: "user-123", age: 25 });</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="updateById"><span class="type-signature">(async) </span>updateById<span class="signature">(idValue, updatedData)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update a record by its ID
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The record ID to update</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>updatedData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The fields to update</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="SheetAPI.js.html">SheetAPI.js</a>, <a href="SheetAPI.js.html#line3527">line 3527</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Returns success with updated record or error message
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Object></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const result = await api.updateById("user-123", { status: "inactive" });</code></pre>
 
 
 
@@ -5584,13 +6738,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SheetAPI.html">SheetAPI</a></li><li><a href="SheetAPITokenManager.html">SheetAPITokenManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#baseURL">baseURL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SheetAPI.html">SheetAPI</a></li><li><a href="SheetAPITokenManager.html">SheetAPITokenManager</a></li></ul><h3>Global</h3><ul><li><a href="global.html#create">create</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getById">getById</a></li><li><a href="global.html#init">init</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Nov 13 2025 02:24:54 GMT+0200 (South Africa Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Nov 13 2025 03:00:18 GMT+0200 (South Africa Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
